@@ -1,0 +1,1270 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Генератор КП</title>
+    <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=RvUWyi0Z98Yk3-db8M39hS7jVJDv8JlSoBvlSNlt9EeI1uT57VzVsHW2gZ5CDbyGVKbANKnbYjdAvVcRXDNmaQWIwtehWdI_4pMDn391G6D3RjPD0K6V40tNibOyUKqJCqNanb5FgM-gaRSjlwntYM6_btG0_90memH-lLWH5HAXdipVMYgl0e0ePNcrM1EyET2dMgx9JUf3aHXEZo_AGEX85Ym4yHrkKcD97LiA4iw2VessHBV_BapM3bvN7gHtmYC2Tc9frLBfjbEYiBJN62YTSSb-Q1C_BTdqSFRNJd7Wh-sIU5IUXQOMTT3gI5XA" charset="UTF-8"></script><style>
+      :root {
+        color-scheme: light;
+        --page-bg: #eef1f4;
+        --panel: #ffffff;
+        --ink: #111111;
+        --muted: #5d6670;
+        --line: #222222;
+        --soft-line: #cfd5dd;
+        --accent: #1f7a4f;
+        --accent-dark: #155b3a;
+        --danger: #bb2d2d;
+        --shadow: 0 18px 50px rgba(17, 24, 39, 0.16);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        min-height: 100%;
+        background: var(--page-bg);
+      }
+
+      body {
+        min-height: 100%;
+        margin: 0;
+        color: var(--ink);
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 12px;
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+      }
+
+      .app {
+        width: min(100%, 1120px);
+        margin: 0 auto;
+        padding: 18px;
+      }
+
+      .toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        width: min(100%, 210mm);
+        margin: 0 auto 14px;
+        padding: 10px;
+        border: 1px solid var(--soft-line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 8px 24px rgba(17, 24, 39, 0.08);
+      }
+
+      .toolbar__group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 84px;
+        min-height: 34px;
+        gap: 6px;
+        padding: 7px 12px;
+        border: 1px solid #aab3bd;
+        border-radius: 7px;
+        background: #ffffff;
+        color: #17202a;
+        cursor: pointer;
+        line-height: 1;
+      }
+
+      .button:hover {
+        border-color: #7f8b98;
+        background: #f7f9fb;
+      }
+
+      .button--primary,
+      .button--print {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: #ffffff;
+      }
+
+      .button--primary:hover,
+      .button--print:hover {
+        border-color: var(--accent-dark);
+        background: var(--accent-dark);
+      }
+
+      .sheet {
+        width: min(100%, 210mm);
+        min-height: 297mm;
+        margin: 0 auto;
+        padding: 10mm;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .document-title {
+        display: block;
+        margin: 0 0 7px;
+      }
+
+      .document-title textarea {
+        width: 100%;
+        min-height: 24px;
+        border: 0;
+        resize: none;
+        overflow: hidden;
+        background: transparent;
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 700;
+        text-align: center;
+      }
+
+      .meta-table,
+      .items-table,
+      .adjustments,
+      .totals {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+
+      .meta-table {
+        margin-bottom: 12px;
+      }
+
+      .meta-table th,
+      .meta-table td,
+      .items-table th,
+      .items-table td,
+      .adjustments th,
+      .adjustments td,
+      .totals th,
+      .totals td {
+        height: 23px;
+        border: 1px solid var(--line);
+        padding: 2px 5px;
+        vertical-align: middle;
+      }
+
+      .meta-table th,
+      .items-table th,
+      .adjustments th,
+      .totals th {
+        font-weight: 700;
+      }
+
+      .meta-table th {
+        width: 18%;
+        text-align: left;
+      }
+
+      .meta-table td {
+        width: 25%;
+        text-align: center;
+      }
+
+      .meta-table input,
+      .items-table input,
+      .adjustments input {
+        width: 100%;
+        min-width: 0;
+        height: 100%;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: var(--ink);
+      }
+
+      .meta-table input {
+        text-align: center;
+      }
+
+      .meta-table input:focus,
+      .items-table input:focus,
+      .adjustments input:focus,
+      .document-title textarea:focus {
+        outline: 2px solid rgba(31, 122, 79, 0.28);
+        outline-offset: 1px;
+        background: rgba(31, 122, 79, 0.05);
+      }
+
+      .brand-cell {
+        width: 68px;
+        padding: 0;
+        text-align: center;
+      }
+
+      .no-sign {
+        position: relative;
+        width: 42px;
+        height: 42px;
+        margin: 0 auto;
+        border: 7px solid var(--danger);
+        border-radius: 50%;
+      }
+
+      .no-sign::after {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 34px;
+        height: 7px;
+        border-radius: 999px;
+        background: var(--danger);
+        content: "";
+        transform: translate(-50%, -50%) rotate(45deg);
+      }
+
+      .items-table {
+        margin-top: 2px;
+      }
+
+      .items-table thead th {
+        height: 24px;
+        text-align: center;
+      }
+
+      .items-table td {
+        height: 24px;
+      }
+
+      .items-table .col-index {
+        width: 38px;
+      }
+
+      .items-table .col-small {
+        width: 58px;
+      }
+
+      .items-table .col-money {
+        width: 104px;
+      }
+
+      .items-table .col-action {
+        width: 40px;
+      }
+
+      .item-index,
+      .row-sum,
+      .goods-total-row td,
+      .totals td {
+        text-align: right;
+      }
+
+      .item-index {
+        text-align: center;
+      }
+
+      .item-name input {
+        text-align: left;
+      }
+
+      .numeric-input,
+      .item-pack input,
+      .item-qty input,
+      .item-price input {
+        text-align: right;
+      }
+
+      .row-remove {
+        display: grid;
+        width: 24px;
+        height: 20px;
+        margin: 0 auto;
+        place-items: center;
+        border: 1px solid #c5cbd3;
+        border-radius: 5px;
+        background: #ffffff;
+        color: #3f4650;
+        cursor: pointer;
+        line-height: 1;
+      }
+
+      .row-remove:hover {
+        border-color: var(--danger);
+        color: var(--danger);
+      }
+
+      .goods-total-row td {
+        font-weight: 700;
+      }
+
+      .goods-total-row td:first-child {
+        text-align: right;
+      }
+
+      .summary {
+        display: grid;
+        grid-template-columns: minmax(230px, 0.8fr) minmax(250px, 1fr);
+        gap: 78px;
+        margin-top: 6px;
+        align-items: start;
+      }
+
+      .adjustments th,
+      .totals th {
+        width: 58%;
+        text-align: left;
+      }
+
+      .adjustments td,
+      .totals td {
+        width: 42%;
+      }
+
+      .final-row th,
+      .final-row td {
+        font-weight: 700;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      @media screen and (max-width: 720px) {
+        body {
+          min-width: 0;
+          background: #f3f5f7;
+          font-size: 14px;
+        }
+
+        .app {
+          padding: 10px;
+        }
+
+        .toolbar {
+          top: 8px;
+          display: grid;
+          grid-template-columns: 1fr;
+          width: 100%;
+          margin-bottom: 10px;
+          padding: 8px;
+        }
+
+        .toolbar__group {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+          min-width: 0;
+        }
+
+        .toolbar__group:first-child {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .button {
+          width: 100%;
+          min-width: 0;
+          min-height: 44px;
+          padding: 9px 8px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .sheet {
+          width: 100%;
+          min-height: auto;
+          padding: 12px;
+          border: 1px solid #d9dee5;
+          border-radius: 8px;
+          box-shadow: 0 8px 22px rgba(17, 24, 39, 0.08);
+        }
+
+        .document-title {
+          margin-bottom: 10px;
+        }
+
+        .document-title textarea {
+          min-height: 42px;
+          padding: 6px 4px;
+          font-size: 15px;
+          line-height: 1.25;
+        }
+
+        .meta-table,
+        .meta-table tbody,
+        .meta-table tr,
+        .meta-table th,
+        .meta-table td {
+          display: block;
+          width: 100%;
+        }
+
+        .meta-table tbody {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+
+        .meta-table tr {
+          display: contents;
+        }
+
+        .meta-table th {
+          display: none;
+        }
+
+        .meta-table td {
+          position: relative;
+          min-width: 0;
+          min-height: 62px;
+          padding: 20px 8px 5px;
+          border: 1px solid #c8d0da;
+          border-radius: 8px;
+          background: #ffffff;
+          text-align: left;
+        }
+
+        .meta-table td::before {
+          position: absolute;
+          top: 6px;
+          left: 8px;
+          color: var(--muted);
+          content: attr(data-label);
+          font-size: 11px;
+          font-weight: 700;
+        }
+
+        .meta-table input {
+          min-height: 32px;
+          font-size: 16px;
+          text-align: left;
+        }
+
+        .brand-cell {
+          display: none !important;
+        }
+
+        .items-table,
+        .items-table thead,
+        .items-table tbody,
+        .items-table tfoot,
+        .items-table tr,
+        .items-table th,
+        .items-table td {
+          display: block;
+          width: 100%;
+        }
+
+        .items-table thead {
+          display: none;
+        }
+
+        .items-table tbody {
+          display: grid;
+          gap: 8px;
+        }
+
+        .items-table tbody tr {
+          display: grid;
+          grid-template-columns: 52px repeat(3, minmax(0, 1fr));
+          gap: 7px;
+          padding: 8px;
+          border: 1px solid #c8d0da;
+          border-radius: 8px;
+          background: #ffffff;
+        }
+
+        .items-table tbody td {
+          position: relative;
+          min-width: 0;
+          height: auto;
+          min-height: 54px;
+          padding: 18px 7px 5px;
+          border: 1px solid #d7dde5;
+          border-radius: 7px;
+          background: #fbfcfd;
+        }
+
+        .items-table tbody td::before {
+          position: absolute;
+          top: 5px;
+          left: 7px;
+          color: var(--muted);
+          content: attr(data-label);
+          font-size: 10px;
+          font-weight: 700;
+        }
+
+        .items-table tbody .item-index {
+          grid-column: 1 / 2;
+          display: grid;
+          min-height: 54px;
+          padding: 0;
+          place-items: center;
+          font-size: 17px;
+          font-weight: 700;
+          text-align: center;
+        }
+
+        .items-table tbody .item-index::before {
+          display: none;
+        }
+
+        .items-table tbody .item-name {
+          grid-column: 2 / 5;
+        }
+
+        .items-table tbody .item-pack {
+          grid-column: 1 / 2;
+        }
+
+        .items-table tbody .item-qty {
+          grid-column: 2 / 3;
+        }
+
+        .items-table tbody .item-price {
+          grid-column: 3 / 5;
+        }
+
+        .items-table tbody .row-sum {
+          grid-column: 1 / 4;
+          display: grid;
+          align-content: end;
+          color: #101820;
+          font-size: 16px;
+          font-weight: 700;
+          text-align: right;
+        }
+
+        .items-table tbody td.no-print {
+          grid-column: 4 / 5;
+          display: grid;
+          min-height: 54px;
+          padding: 0;
+          place-items: center;
+          border-style: dashed;
+          background: #ffffff;
+        }
+
+        .items-table tbody td.no-print::before {
+          display: none;
+        }
+
+        .items-table input,
+        .adjustments input {
+          min-height: 30px;
+          font-size: 16px;
+        }
+
+        .row-remove {
+          width: 38px;
+          height: 38px;
+          border-radius: 7px;
+          color: var(--danger);
+          font-size: 18px;
+        }
+
+        .items-table tfoot {
+          margin-top: 8px;
+        }
+
+        .goods-total-row {
+          display: grid !important;
+          grid-template-columns: 1fr auto;
+          align-items: center;
+          gap: 10px;
+          padding: 10px;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          background: #ffffff;
+        }
+
+        .goods-total-row td {
+          height: auto;
+          padding: 0;
+          border: 0;
+          font-size: 16px;
+        }
+
+        .goods-total-row td:first-child {
+          text-align: left;
+        }
+
+        .summary {
+          grid-template-columns: 1fr;
+          gap: 8px;
+          margin-top: 8px;
+        }
+
+        .adjustments,
+        .totals,
+        .adjustments tbody,
+        .totals tbody,
+        .adjustments tr,
+        .totals tr,
+        .adjustments th,
+        .totals th,
+        .adjustments td,
+        .totals td {
+          display: block;
+          width: 100%;
+        }
+
+        .adjustments tr,
+        .totals tr {
+          display: grid;
+          grid-template-columns: 1fr 130px;
+          align-items: center;
+          border: 1px solid #c8d0da;
+          background: #ffffff;
+        }
+
+        .adjustments tr + tr,
+        .totals tr + tr {
+          border-top: 0;
+        }
+
+        .adjustments th,
+        .totals th,
+        .adjustments td,
+        .totals td {
+          min-height: 44px;
+          padding: 9px 8px;
+          border: 0;
+        }
+
+        .adjustments td,
+        .totals td {
+          border-left: 1px solid #c8d0da;
+          font-size: 16px;
+        }
+
+        .totals td {
+          display: grid;
+          align-items: center;
+          font-weight: 700;
+        }
+      }
+
+      @page {
+        size: A4 portrait;
+        margin: 8mm;
+      }
+
+      @media print {
+        html,
+        body {
+          width: 100%;
+          min-height: auto;
+          background: #ffffff;
+        }
+
+        body {
+          color: #000000;
+          font-size: 10px;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+
+        .no-print {
+          display: none !important;
+        }
+
+        .app {
+          width: 100%;
+          padding: 0;
+        }
+
+        .sheet {
+          width: 100%;
+          min-height: auto;
+          margin: 0;
+          padding: 0;
+          box-shadow: none;
+        }
+
+        .meta-table,
+        .items-table,
+        .adjustments,
+        .totals {
+          display: table;
+          width: 100%;
+          border-collapse: collapse;
+          table-layout: fixed;
+        }
+
+        .meta-table tbody,
+        .items-table tbody,
+        .items-table thead,
+        .items-table tfoot,
+        .adjustments tbody,
+        .totals tbody {
+          display: table-row-group;
+        }
+
+        .items-table thead {
+          display: table-header-group;
+        }
+
+        .items-table tfoot {
+          display: table-footer-group;
+        }
+
+        .meta-table tr,
+        .items-table tr,
+        .adjustments tr,
+        .totals tr {
+          display: table-row;
+        }
+
+        .meta-table th,
+        .meta-table td,
+        .items-table th,
+        .items-table td,
+        .adjustments th,
+        .adjustments td,
+        .totals th,
+        .totals td {
+          display: table-cell;
+          border: 1px solid #000000;
+          border-radius: 0;
+          background: transparent;
+        }
+
+        .meta-table td::before,
+        .items-table td::before {
+          content: none !important;
+          display: none !important;
+        }
+
+        .brand-cell {
+          display: table-cell !important;
+        }
+
+        .document-title textarea {
+          font-size: 12px;
+        }
+
+        .meta-table {
+          margin-bottom: 10px;
+        }
+
+        .meta-table th,
+        .meta-table td,
+        .items-table th,
+        .items-table td,
+        .adjustments th,
+        .adjustments td,
+        .totals th,
+        .totals td {
+          height: 19px;
+          border-color: #000000;
+          padding: 1px 4px;
+        }
+
+        .items-table .col-action {
+          display: none;
+        }
+
+        .items-table {
+          break-inside: auto;
+        }
+
+        .items-table tr {
+          break-inside: avoid;
+          break-after: auto;
+        }
+
+        .summary {
+          grid-template-columns: 1fr 1fr;
+          gap: 62px;
+        }
+
+        input {
+          color: #000000;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <div class="toolbar no-print" aria-label="Панель управления">
+        <div class="toolbar__group">
+          <button class="button button--primary" id="addRow" type="button" title="Добавить строку">
+            <span aria-hidden="true">+</span>
+            <span>Строка</span>
+          </button>
+          <button class="button" id="removeRow" type="button" title="Удалить последнюю строку">
+            <span aria-hidden="true">-</span>
+            <span>Строка</span>
+          </button>
+        </div>
+        <div class="toolbar__group">
+          <button class="button" id="clearData" type="button">Очистить</button>
+          <button class="button" id="restoreSample" type="button">Пример</button>
+          <button class="button button--print" id="printPdf" type="button">PDF</button>
+        </div>
+      </div>
+
+      <section class="sheet" id="quoteSheet" aria-label="Коммерческое предложение">
+        <label class="document-title">
+          <span class="sr-only">Заголовок</span>
+          <textarea id="documentTitle" rows="1" autocomplete="off"></textarea>
+        </label>
+
+        <table class="meta-table" aria-label="Данные заказа">
+          <tbody>
+            <tr>
+              <th scope="row">Заказчик:</th>
+              <td data-label="Заказчик"><input id="customer" type="text" autocomplete="off" /></td>
+              <th scope="row">Номер:</th>
+              <td data-label="Номер"><input id="orderNumber" type="text" autocomplete="off" /></td>
+              <td class="brand-cell" rowspan="3" aria-label="Логотип">
+                <div class="no-sign" aria-hidden="true"></div>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Телефон:</th>
+              <td data-label="Телефон"><input id="phone" type="text" autocomplete="off" /></td>
+              <th scope="row">Дата:</th>
+              <td data-label="Дата"><input id="date" type="text" autocomplete="off" /></td>
+            </tr>
+            <tr>
+              <th scope="row">Город:</th>
+              <td data-label="Город"><input id="city" type="text" autocomplete="off" /></td>
+              <th scope="row">Менеджер:</th>
+              <td data-label="Менеджер"><input id="manager" type="text" autocomplete="off" /></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table class="items-table" aria-label="Товары">
+          <thead>
+            <tr>
+              <th class="col-index" scope="col">№</th>
+              <th scope="col">Наименование</th>
+              <th class="col-small" scope="col">Пачка</th>
+              <th class="col-small" scope="col">Шт</th>
+              <th class="col-money" scope="col">Цена</th>
+              <th class="col-money" scope="col">Сумма</th>
+              <th class="col-action no-print" scope="col"></th>
+            </tr>
+          </thead>
+          <tbody id="itemsBody"></tbody>
+          <tfoot>
+            <tr class="goods-total-row">
+              <td colspan="5">Итого товаров:</td>
+              <td id="goodsTotal">0,00</td>
+              <td class="no-print"></td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <div class="summary">
+          <table class="adjustments" aria-label="Дополнительные расчеты">
+            <tbody>
+              <tr>
+                <th scope="row">Скидка, %</th>
+                <td><input id="discountPercent" class="numeric-input" type="text" inputmode="decimal" /></td>
+              </tr>
+              <tr>
+                <th scope="row">Комиссия, %</th>
+                <td><input id="commissionPercent" class="numeric-input" type="text" inputmode="decimal" /></td>
+              </tr>
+              <tr>
+                <th scope="row">Доп. расходы</th>
+                <td><input id="extraCosts" class="numeric-input" type="text" inputmode="decimal" /></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <table class="totals" aria-label="Итог">
+            <tbody>
+              <tr>
+                <th scope="row">Сумма со скидкой:</th>
+                <td id="discountedTotal">0,00</td>
+              </tr>
+              <tr>
+                <th scope="row">После комиссии:</th>
+                <td id="commissionTotal">0,00</td>
+              </tr>
+              <tr class="final-row">
+                <th scope="row">ИТОГО к оплате:</th>
+                <td id="finalTotal">0,00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        const storageKey = "kp-generator-state-v1";
+        const minRows = 1;
+
+        const sampleItems = [
+          { name: "1163 сор", pack: "1", qty: "1", price: "4 000,00" },
+          { name: "1163 роз", pack: "1", qty: "4", price: "4 000,00" },
+          { name: "71079", pack: "1", qty: "5", price: "4 000,00" },
+        ];
+
+        const emptyItem = () => ({ name: "", pack: "", qty: "", price: "" });
+
+        const makeRows = (items, rowCount) => {
+          const rows = items.map((item) => ({ ...emptyItem(), ...item }));
+          while (rows.length < rowCount) rows.push(emptyItem());
+          return rows;
+        };
+
+        const defaultState = () => ({
+          documentTitle: "Накладная: Vanilla Collection, рынок Ожет, Ряд - 5, Бутик - 3",
+          customer: "Халиду",
+          phone: "",
+          city: "Алматы",
+          orderNumber: "",
+          date: formatDate(new Date()),
+          manager: "Райым",
+          discountPercent: "",
+          commissionPercent: "1,00",
+          extraCosts: "",
+          items: makeRows(sampleItems, 28),
+        });
+
+        const els = {
+          documentTitle: document.getElementById("documentTitle"),
+          customer: document.getElementById("customer"),
+          phone: document.getElementById("phone"),
+          city: document.getElementById("city"),
+          orderNumber: document.getElementById("orderNumber"),
+          date: document.getElementById("date"),
+          manager: document.getElementById("manager"),
+          discountPercent: document.getElementById("discountPercent"),
+          commissionPercent: document.getElementById("commissionPercent"),
+          extraCosts: document.getElementById("extraCosts"),
+          itemsBody: document.getElementById("itemsBody"),
+          goodsTotal: document.getElementById("goodsTotal"),
+          discountedTotal: document.getElementById("discountedTotal"),
+          commissionTotal: document.getElementById("commissionTotal"),
+          finalTotal: document.getElementById("finalTotal"),
+          addRow: document.getElementById("addRow"),
+          removeRow: document.getElementById("removeRow"),
+          clearData: document.getElementById("clearData"),
+          restoreSample: document.getElementById("restoreSample"),
+          printPdf: document.getElementById("printPdf"),
+        };
+
+        let state = loadState();
+
+        bindStaticFields();
+        render();
+        recalculate();
+
+        els.addRow.addEventListener("click", () => {
+          state.items.push(emptyItem());
+          renderRows();
+          recalculateAndSave();
+          focusLastRowName();
+        });
+
+        els.removeRow.addEventListener("click", () => {
+          if (state.items.length <= minRows) return;
+          state.items.pop();
+          renderRows();
+          recalculateAndSave();
+        });
+
+        els.clearData.addEventListener("click", () => {
+          const ok = window.confirm("Очистить КП?");
+          if (!ok) return;
+          state = {
+            ...defaultState(),
+            customer: "",
+            phone: "",
+            city: "",
+            orderNumber: "",
+            manager: "",
+            discountPercent: "",
+            commissionPercent: "",
+            extraCosts: "",
+            items: makeRows([], 18),
+          };
+          render();
+          recalculateAndSave();
+        });
+
+        els.restoreSample.addEventListener("click", () => {
+          state = defaultState();
+          render();
+          recalculateAndSave();
+        });
+
+        els.printPdf.addEventListener("click", () => {
+          blurActiveInput();
+          resizeTitle();
+          recalculateAndSave();
+          window.print();
+        });
+
+        window.addEventListener("resize", resizeTitle);
+
+        function bindStaticFields() {
+          [
+            "documentTitle",
+            "customer",
+            "phone",
+            "city",
+            "orderNumber",
+            "date",
+            "manager",
+            "discountPercent",
+            "commissionPercent",
+            "extraCosts",
+          ].forEach((key) => {
+            els[key].addEventListener("input", () => {
+              state[key] = els[key].value;
+              if (key === "documentTitle") resizeTitle();
+              recalculateAndSave();
+            });
+
+            if (["discountPercent", "commissionPercent", "extraCosts"].includes(key)) {
+              els[key].addEventListener("blur", () => {
+                els[key].value = formatEditableNumber(els[key].value);
+                state[key] = els[key].value;
+                recalculateAndSave();
+              });
+            }
+          });
+        }
+
+        function render() {
+          [
+            "documentTitle",
+            "customer",
+            "phone",
+            "city",
+            "orderNumber",
+            "date",
+            "manager",
+            "discountPercent",
+            "commissionPercent",
+            "extraCosts",
+          ].forEach((key) => {
+            els[key].value = state[key] ?? "";
+          });
+
+          resizeTitle();
+          renderRows();
+        }
+
+        function renderRows() {
+          els.itemsBody.replaceChildren();
+
+          state.items.forEach((item, index) => {
+            const row = document.createElement("tr");
+            row.dataset.index = String(index);
+
+            const indexCell = document.createElement("td");
+            indexCell.className = "item-index";
+            row.append(indexCell);
+
+            row.append(makeInputCell("item-name", "name", "Наименование", item.name, "text"));
+            row.append(makeInputCell("item-pack", "pack", "Пачка", item.pack, "decimal"));
+            row.append(makeInputCell("item-qty", "qty", "Шт", item.qty, "decimal"));
+            row.append(makeInputCell("item-price", "price", "Цена", item.price, "decimal"));
+
+            const sumCell = document.createElement("td");
+            sumCell.className = "row-sum";
+            sumCell.dataset.label = "Сумма";
+            sumCell.textContent = "0,00";
+            row.append(sumCell);
+
+            const actionCell = document.createElement("td");
+            actionCell.className = "no-print";
+            const removeButton = document.createElement("button");
+            removeButton.className = "row-remove";
+            removeButton.type = "button";
+            removeButton.title = "Удалить строку";
+            removeButton.textContent = "x";
+            removeButton.addEventListener("click", () => {
+              if (state.items.length <= minRows) return;
+              state.items.splice(index, 1);
+              renderRows();
+              recalculateAndSave();
+            });
+            actionCell.append(removeButton);
+            row.append(actionCell);
+
+            els.itemsBody.append(row);
+          });
+
+          recalculate();
+        }
+
+        function makeInputCell(className, key, label, value, mode) {
+          const cell = document.createElement("td");
+          cell.className = className;
+          cell.dataset.label = label;
+
+          const input = document.createElement("input");
+          input.type = "text";
+          input.autocomplete = "off";
+          input.value = value ?? "";
+          if (mode === "decimal") input.inputMode = "decimal";
+
+          input.addEventListener("input", (event) => {
+            const row = event.currentTarget.closest("tr");
+            const rowIndex = Number(row.dataset.index);
+            state.items[rowIndex][key] = event.currentTarget.value;
+            recalculateAndSave();
+          });
+
+          input.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter") return;
+            const row = event.currentTarget.closest("tr");
+            const rowIndex = Number(row.dataset.index);
+            if (rowIndex !== state.items.length - 1) return;
+            state.items.push(emptyItem());
+            renderRows();
+            recalculateAndSave();
+            focusLastRowName();
+          });
+
+          if (["pack", "qty", "price"].includes(key)) {
+            input.addEventListener("blur", (event) => {
+              const row = event.currentTarget.closest("tr");
+              const rowIndex = Number(row.dataset.index);
+              const decimals = key === "price" ? 2 : 0;
+              event.currentTarget.value = formatEditableNumber(event.currentTarget.value, decimals);
+              state.items[rowIndex][key] = event.currentTarget.value;
+              recalculateAndSave();
+            });
+          }
+
+          cell.append(input);
+          return cell;
+        }
+
+        function recalculateAndSave() {
+          recalculate();
+          saveState();
+        }
+
+        function recalculate() {
+          let goodsTotal = 0;
+          let visibleNumber = 1;
+
+          Array.from(els.itemsBody.rows).forEach((row, index) => {
+            const item = state.items[index] || emptyItem();
+            const hasContent = Boolean(
+              item.name.trim() || item.pack.trim() || item.qty.trim() || item.price.trim(),
+            );
+            const pack = parseNumber(item.pack) || 0;
+            const qty = parseNumber(item.qty) || 0;
+            const price = parseNumber(item.price) || 0;
+            const rowTotal = pack * qty * price;
+
+            row.querySelector(".item-index").textContent = hasContent ? String(visibleNumber++) : "";
+            row.querySelector(".row-sum").textContent = rowTotal ? formatMoney(rowTotal) : "";
+            goodsTotal += rowTotal;
+          });
+
+          const discountPercent = parseNumber(state.discountPercent);
+          const commissionPercent = parseNumber(state.commissionPercent);
+          const extraCosts = parseNumber(state.extraCosts);
+          const discountedTotal = goodsTotal - goodsTotal * (discountPercent / 100);
+          const commissionTotal = discountedTotal + discountedTotal * (commissionPercent / 100);
+          const finalTotal = commissionTotal + extraCosts;
+
+          els.goodsTotal.textContent = formatMoney(goodsTotal);
+          els.discountedTotal.textContent = formatMoney(discountedTotal);
+          els.commissionTotal.textContent = formatMoney(commissionTotal);
+          els.finalTotal.textContent = formatMoney(finalTotal);
+        }
+
+        function loadState() {
+          try {
+            const saved = JSON.parse(localStorage.getItem(storageKey));
+            if (!saved || !Array.isArray(saved.items)) return defaultState();
+            return {
+              ...defaultState(),
+              ...saved,
+              items: makeRows(saved.items, Math.max(saved.items.length, minRows)),
+            };
+          } catch (error) {
+            return defaultState();
+          }
+        }
+
+        function saveState() {
+          localStorage.setItem(storageKey, JSON.stringify(state));
+        }
+
+        function parseNumber(value) {
+          if (typeof value === "number") return value;
+          const normalized = String(value || "")
+            .replace(/\s/g, "")
+            .replace(",", ".")
+            .replace(/[^\d.-]/g, "");
+          const parsed = Number.parseFloat(normalized);
+          return Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        function formatEditableNumber(value, decimals = 2) {
+          if (String(value || "").trim() === "") return "";
+          return formatNumber(parseNumber(value), decimals);
+        }
+
+        function formatMoney(value) {
+          return formatNumber(value, 2);
+        }
+
+        function formatNumber(value, decimals) {
+          return Number(value || 0)
+            .toLocaleString("ru-RU", {
+              minimumFractionDigits: decimals,
+              maximumFractionDigits: decimals,
+            })
+            .replace(/\u00a0/g, " ");
+        }
+
+        function formatDate(date) {
+          const day = String(date.getDate()).padStart(2, "0");
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          return `${day}.${month}.${date.getFullYear()}`;
+        }
+
+        function focusLastRowName() {
+          window.requestAnimationFrame(() => {
+            const rows = els.itemsBody.rows;
+            const lastRow = rows[rows.length - 1];
+            const input = lastRow?.querySelector(".item-name input");
+            input?.focus();
+          });
+        }
+
+        function resizeTitle() {
+          els.documentTitle.style.height = "auto";
+          els.documentTitle.style.height = `${els.documentTitle.scrollHeight}px`;
+        }
+
+        function blurActiveInput() {
+          if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+          }
+        }
+      })();
+    </script>
+  </body>
+</html>
